@@ -1,6 +1,2 @@
-opencv-python
+opencv-contrib-python
 numpy
-Flask
-pandas
-openpyxl
-Pillow
