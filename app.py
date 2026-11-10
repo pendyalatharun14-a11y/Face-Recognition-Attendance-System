@@ -11,10 +11,7 @@ DATASET_PATH = "known_faces"
 ATTENDANCE_FILE = "attendance.csv"
 
 # Load OpenCV face detector
-face_detector = cv2.CascadeClassifier(
-    cv2.data.haarcascades +
-    "haarcascade_frontalface_default.xml"
-)
+face_detector = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
 # Create attendance file if it doesn't exist
 if not os.path.exists(ATTENDANCE_FILE):
