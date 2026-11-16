@@ -3,6 +3,9 @@ from flask import Flask, render_template_string, request, send_file
 import pandas as pd
 from io import BytesIO
 import os
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
 app = Flask(__name__)
 
 HTML = """
@@ -122,6 +125,10 @@ tr:nth-child(even) {
     <button type="submit">Download Attendance Excel</button>
 </form>
 
+<form action="/download-pdf" method="GET">
+    <button type="submit">Download Attendance PDF</button>
+</form>
+
     <form method="GET" action="/">
     <input type="text" name="search" placeholder="Search by name (Tharun or Dhanush)">
     <input type="date" name="date">
@@ -185,6 +192,45 @@ def export_attendance():
         as_attachment=True,
         download_name="attendance.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+@app.route("/download-pdf")
+def export_pdf():
+    df = pd.read_csv("attendance.csv")
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(50, height - 50, "Attendance Report")
+
+    pdf.setFont("Helvetica-Bold", 11)
+    pdf.drawString(50, height - 90, "Name")
+    pdf.drawString(220, height - 90, "Date")
+    pdf.drawString(380, height - 90, "Time")
+
+    y = height - 120
+    pdf.setFont("Helvetica", 10)
+
+    for _, row in df.iterrows():
+        if y < 50:
+            pdf.showPage()
+            y = height - 50
+            pdf.setFont("Helvetica", 10)
+
+        pdf.drawString(50, y, str(row["Name"]))
+        pdf.drawString(220, y, str(row["Date"]))
+        pdf.drawString(380, y, str(row["Time"]))
+        y -= 25
+
+    pdf.save()
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="attendance_report.pdf",
+        mimetype="application/pdf"
     )
 if __name__ == "__main__":
     app.run(debug=True)
