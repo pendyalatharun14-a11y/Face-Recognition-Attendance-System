@@ -12,6 +12,7 @@ ATTENDANCE_FILE = "attendance.csv"
 
 # Load OpenCV face detector
 face_detector = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+eye_detector = cv2.CascadeClassifier("haarcascade_eye.xml")
 
 # Create attendance file if it doesn't exist
 if not os.path.exists(ATTENDANCE_FILE):
@@ -93,7 +94,7 @@ if not camera.isOpened():
 
 print("Attendance System Started!")
 print("Press Q to exit.")
-
+blink_states = {}
 while True:
     success, frame = camera.read()
 
@@ -108,6 +109,20 @@ while True:
 
     for (x, y, w, h) in detected_faces:
         face = gray[y:y+h, x:x+w]
+        detected_eyes = eye_detector.detectMultiScale(
+            face,
+            scaleFactor=1.1,
+            minNeighbors=5,
+            minSize=(15, 15)
+        )
+        for (ex, ey, ew, eh) in detected_eyes:
+            cv2.rectangle(
+                frame,
+                (x + ex, y + ey),
+                (x + ex + ew, y + ey + eh),
+                (255, 0, 0),
+                2
+            )
         face = cv2.resize(face, (200, 200))
 
         label, confidence = recognizer.predict(face)
