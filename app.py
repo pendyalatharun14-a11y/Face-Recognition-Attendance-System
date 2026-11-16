@@ -112,7 +112,7 @@ while True:
 
         label, confidence = recognizer.predict(face)
 
-        if confidence < 70 and label in names:
+        if confidence < 100 and label in names:
             name = names[label]
 
             color = (0, 255, 0)
